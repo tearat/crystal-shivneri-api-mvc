@@ -1,0 +1,10 @@
+name: shards
+version: 0.1.0
+
+dependencies:
+  dotenv:
+    github: gdotdesign/cr-dotenv
+  mysql:
+    github: crystal-lang/crystal-mysql
+  shivneri:
+    github: ujjwalguptaofficial/shivneri
