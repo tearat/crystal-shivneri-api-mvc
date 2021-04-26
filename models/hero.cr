@@ -1,26 +1,34 @@
 require "db"
 require "mysql"
 require "dotenv"
+require "json"
 
 Dotenv.load
 
-class Hero
-  # @@fields = {
-  #   "id"    => Int32,
-  #   "title" => String
-  # } 
+struct HeroStruct
+  property id, title
 
+  def initialize(@id : Int32, @title : String)
+  end
+
+  def to_json(json : JSON::Builder)
+    json.object do
+      json.field "id", self.id
+      json.field "title", self.title
+    end
+  end
+end
+
+class Hero
   @@db = ENV["DB"]
 
   def self.all
-    items = [] of Hash(String, String|Int32)
+    items = [] of HeroStruct
 
     DB.open @@db do |db|
       db.query "select id, title from heroes" do |rs|
         rs.each do
-          item = Hash(String, String|Int32).new
-          item["id"] = rs.read(Int32)
-          item["title"] = rs.read(String)
+          item = HeroStruct.new(rs.read(Int32), rs.read(String))
           items << item
         end
       end
@@ -29,16 +37,19 @@ class Hero
   end
 
   def self.find(id)
-    item = Hash(String, String|Int32).new
+    items = [] of HeroStruct
 
     DB.open @@db do |db|
       db.query "select id, title from heroes where id = #{id}" do |rs|
         rs.each do
-          item["id"] = rs.read(Int32)
-          item["title"] = rs.read(String)
+          item = HeroStruct.new(rs.read(Int32), rs.read(String))
+          items << item
         end
       end
     end
-    item
+
+    return nil if items.size < 1
+
+    items[0]
   end
 end
